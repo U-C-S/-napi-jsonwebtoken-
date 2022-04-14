@@ -4,38 +4,27 @@
   "description": "A JWT library for node, implemented in Rust",
   "repository": "git@github.com:napi-rs/package-template.git",
   "license": "MIT",
-  "keywords": [
-    "napi-rs",
-    "NAPI",
-    "N-API",
-    "Rust",
-    "node-addon",
-    "node-addon-api"
-  ],
   "main": "index.js",
   "napi": {
-    "name": "package-template",
+    "name": "napi-jsonwebtoken",
     "triples": {
       "defaults": true,
       "additional": [
         "x86_64-unknown-linux-musl",
         "aarch64-unknown-linux-gnu",
-        "i686-pc-windows-msvc",
         "armv7-unknown-linux-gnueabihf",
         "aarch64-apple-darwin",
-        "aarch64-linux-android",
         "x86_64-unknown-freebsd",
         "aarch64-unknown-linux-musl",
-        "aarch64-pc-windows-msvc",
-        "armv7-linux-androideabi"
+        "aarch64-pc-windows-msvc"
       ]
     }
   },
   "scripts": {
     "artifacts": "napi artifacts",
     "bench": "node -r @swc-node/register benchmark/bench.ts",
-    "build": "napi build --platform --release",
-    "build:debug": "napi build --platform",
+    "build": "napi build --platform",
+    "build:release": "napi build --platform --release",
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "version": "napi version"
@@ -55,6 +44,14 @@
   "engines": {
     "node": ">= 12"
   },
+  "keywords": [
+    "napi-rs",
+    "NAPI",
+    "N-API",
+    "Rust",
+    "node-addon",
+    "node-addon-api"
+  ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"

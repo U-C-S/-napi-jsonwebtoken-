@@ -1,5 +1,7 @@
 #![deny(clippy::all)]
 
+pub mod sign;
+
 use napi_derive::napi;
 
 #[cfg(all(
