@@ -3,7 +3,7 @@
 #[macro_use]
 extern crate napi_derive;
 
-// pub mod sign;
+pub mod sign;
 // use napi_derive::napi;
 
 // #[cfg(all(
@@ -14,6 +14,8 @@ extern crate napi_derive;
 // ))]
 // #[global_allocator]
 // static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
+pub use sign::sign;
 
 #[napi]
 fn sum(a: i32, b: i32) -> i32 {
