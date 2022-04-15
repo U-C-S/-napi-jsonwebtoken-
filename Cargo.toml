@@ -4,19 +4,15 @@ authors = ["Chanakya <uchanakyasrinivas@gmail.com>"]
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = "2"
+# Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
+napi = { git = "https://github.com/napi-rs/napi-rs", default-features = false, features = ["napi4"] }
 napi-derive = "2"
-jsonwebtoken = "8.1.0"
-serde = {version = "1.0", features = ["derive"] }
-
-[target.'cfg(all(any(windows, unix), target_arch = "x86_64", not(target_env = "musl")))'.dependencies]
-mimalloc = {version = "0.1"}
+jsonwebtoken = "8"
+serde = { version = "1", features = ["derive"] }
 
 [build-dependencies]
 napi-build = "1"
