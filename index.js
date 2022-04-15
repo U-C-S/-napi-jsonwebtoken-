@@ -5,58 +5,92 @@ const { platform, arch } = process
 
 let nativeBinding = null
 let localFileExisted = false
-let isMusl = false
 let loadError = null
+
+function isMusl() {
+  // For Node 10
+  if (!process.report || typeof process.report.getReport !== 'function') {
+    try {
+      return readFileSync('/usr/bin/ldd', 'utf8').includes('musl')
+    } catch (e) {
+      return true
+    }
+  } else {
+    const { glibcVersionRuntime } = process.report.getReport().header
+    return !glibcVersionRuntime
+  }
+}
 
 switch (platform) {
   case 'android':
-    if (arch !== 'arm64') {
-      throw new Error(`Unsupported architecture on Android ${arch}`)
-    }
-    localFileExisted = existsSync(join(__dirname, 'package-template.android-arm64.node'))
-    try {
-      if (localFileExisted) {
-        nativeBinding = require('./package-template.android-arm64.node')
-      } else {
-        nativeBinding = require('@napi-rs/package-template-android-arm64')
-      }
-    } catch (e) {
-      loadError = e
+    switch (arch) {
+      case 'arm64':
+        localFileExisted = existsSync(join(__dirname, 'napi-jsonwebtoken.android-arm64.node'))
+        try {
+          if (localFileExisted) {
+            nativeBinding = require('./napi-jsonwebtoken.android-arm64.node')
+          } else {
+            nativeBinding = require('napi-jsonwebtoken-android-arm64')
+          }
+        } catch (e) {
+          loadError = e
+        }
+        break
+      case 'arm':
+        localFileExisted = existsSync(join(__dirname, 'napi-jsonwebtoken.android-arm-eabi.node'))
+        try {
+          if (localFileExisted) {
+            nativeBinding = require('./napi-jsonwebtoken.android-arm-eabi.node')
+          } else {
+            nativeBinding = require('napi-jsonwebtoken-android-arm-eabi')
+          }
+        } catch (e) {
+          loadError = e
+        }
+        break
+      default:
+        throw new Error(`Unsupported architecture on Android ${arch}`)
     }
     break
   case 'win32':
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.win32-x64-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'napi-jsonwebtoken.win32-x64-msvc.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.win32-x64-msvc.node')
+            nativeBinding = require('./napi-jsonwebtoken.win32-x64-msvc.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-win32-x64-msvc')
+            nativeBinding = require('napi-jsonwebtoken-win32-x64-msvc')
           }
         } catch (e) {
           loadError = e
         }
         break
       case 'ia32':
-        localFileExisted = existsSync(join(__dirname, 'package-template.win32-ia32-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'napi-jsonwebtoken.win32-ia32-msvc.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.win32-ia32-msvc.node')
+            nativeBinding = require('./napi-jsonwebtoken.win32-ia32-msvc.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-win32-ia32-msvc')
+            nativeBinding = require('napi-jsonwebtoken-win32-ia32-msvc')
           }
         } catch (e) {
           loadError = e
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.win32-arm64-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'napi-jsonwebtoken.win32-arm64-msvc.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.win32-arm64-msvc.node')
+            nativeBinding = require('./napi-jsonwebtoken.win32-arm64-msvc.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-win32-arm64-msvc')
+            nativeBinding = require('napi-jsonwebtoken-win32-arm64-msvc')
           }
         } catch (e) {
           loadError = e
@@ -69,24 +103,26 @@ switch (platform) {
   case 'darwin':
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.darwin-x64.node'))
+        localFileExisted = existsSync(join(__dirname, 'napi-jsonwebtoken.darwin-x64.node'))
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.darwin-x64.node')
+            nativeBinding = require('./napi-jsonwebtoken.darwin-x64.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-darwin-x64')
+            nativeBinding = require('napi-jsonwebtoken-darwin-x64')
           }
         } catch (e) {
           loadError = e
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.darwin-arm64.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'napi-jsonwebtoken.darwin-arm64.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.darwin-arm64.node')
+            nativeBinding = require('./napi-jsonwebtoken.darwin-arm64.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-darwin-arm64')
+            nativeBinding = require('napi-jsonwebtoken-darwin-arm64')
           }
         } catch (e) {
           loadError = e
@@ -100,12 +136,12 @@ switch (platform) {
     if (arch !== 'x64') {
       throw new Error(`Unsupported architecture on FreeBSD: ${arch}`)
     }
-    localFileExisted = existsSync(join(__dirname, 'package-template.freebsd-x64.node'))
+    localFileExisted = existsSync(join(__dirname, 'napi-jsonwebtoken.freebsd-x64.node'))
     try {
       if (localFileExisted) {
-        nativeBinding = require('./package-template.freebsd-x64.node')
+        nativeBinding = require('./napi-jsonwebtoken.freebsd-x64.node')
       } else {
-        nativeBinding = require('@napi-rs/package-template-freebsd-x64')
+        nativeBinding = require('napi-jsonwebtoken-freebsd-x64')
       }
     } catch (e) {
       loadError = e
@@ -114,25 +150,28 @@ switch (platform) {
   case 'linux':
     switch (arch) {
       case 'x64':
-        isMusl = readFileSync('/usr/bin/ldd', 'utf8').includes('musl')
-        if (isMusl) {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-x64-musl.node'))
+        if (isMusl()) {
+          localFileExisted = existsSync(
+            join(__dirname, 'napi-jsonwebtoken.linux-x64-musl.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-x64-musl.node')
+              nativeBinding = require('./napi-jsonwebtoken.linux-x64-musl.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-x64-musl')
+              nativeBinding = require('napi-jsonwebtoken-linux-x64-musl')
             }
           } catch (e) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-x64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'napi-jsonwebtoken.linux-x64-gnu.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-x64-gnu.node')
+              nativeBinding = require('./napi-jsonwebtoken.linux-x64-gnu.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-x64-gnu')
+              nativeBinding = require('napi-jsonwebtoken-linux-x64-gnu')
             }
           } catch (e) {
             loadError = e
@@ -140,25 +179,28 @@ switch (platform) {
         }
         break
       case 'arm64':
-        isMusl = readFileSync('/usr/bin/ldd', 'utf8').includes('musl')
-        if (isMusl) {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm64-musl.node'))
+        if (isMusl()) {
+          localFileExisted = existsSync(
+            join(__dirname, 'napi-jsonwebtoken.linux-arm64-musl.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-arm64-musl.node')
+              nativeBinding = require('./napi-jsonwebtoken.linux-arm64-musl.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-arm64-musl')
+              nativeBinding = require('napi-jsonwebtoken-linux-arm64-musl')
             }
           } catch (e) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'napi-jsonwebtoken.linux-arm64-gnu.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-arm64-gnu.node')
+              nativeBinding = require('./napi-jsonwebtoken.linux-arm64-gnu.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-arm64-gnu')
+              nativeBinding = require('napi-jsonwebtoken-linux-arm64-gnu')
             }
           } catch (e) {
             loadError = e
@@ -166,12 +208,14 @@ switch (platform) {
         }
         break
       case 'arm':
-        localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm-gnueabihf.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'napi-jsonwebtoken.linux-arm-gnueabihf.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.linux-arm-gnueabihf.node')
+            nativeBinding = require('./napi-jsonwebtoken.linux-arm-gnueabihf.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-linux-arm-gnueabihf')
+            nativeBinding = require('napi-jsonwebtoken-linux-arm-gnueabihf')
           }
         } catch (e) {
           loadError = e
@@ -192,6 +236,6 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { plus100 } = nativeBinding
+const { sum } = nativeBinding
 
-module.exports.plus100 = plus100
+module.exports.sum = sum
