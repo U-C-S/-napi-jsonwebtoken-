@@ -1,20 +1,22 @@
 use jsonwebtoken::{Algorithm, Header};
 use napi::bindgen_prelude::ToNapiValue;
 
+#[derive(Debug, Clone)]
 #[napi(object)]
 pub struct JwtHeader {
-    pub typ: Option<String>,
     pub alg: JwtAlgorithm,
     pub cty: Option<String>,
     pub jku: Option<String>,
     // pub jwk: Option<jsonwebtoken::jwk::Jwk>,
     pub kid: Option<String>,
+    pub typ: Option<String>,
     pub x5u: Option<String>,
     pub x5c: Option<Vec<String>>,
     pub x5t: Option<String>,
     pub x5t_s256: Option<String>,
 }
 
+#[derive(Debug)]
 #[napi]
 pub enum JwtAlgorithm {
     HS256,
@@ -33,12 +35,12 @@ pub enum JwtAlgorithm {
 
 pub fn map_header(header: JwtHeader) -> Header {
     Header {
-        typ: header.typ,
         alg: map_algorithm(header.alg),
         cty: header.cty,
         jku: header.jku,
         jwk: None,
         kid: header.kid,
+        typ: header.typ,
         x5u: header.x5u,
         x5c: header.x5c,
         x5t: header.x5t,

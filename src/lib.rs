@@ -14,9 +14,9 @@ pub mod types;
 // #[global_allocator]
 // static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-pub use sign::sign;
+// pub use sign::sign;
 
 #[napi]
-fn sum(a: i32, b: i32) -> i32 {
+pub fn sum(a: i32, b: i32) -> i32 {
     a + b
 }
