@@ -4,8 +4,9 @@ import { JwtAlgorithm, sign } from '../index.js';
 
 test('Compare with jsonwebtoken npm package', (t) => {
   let payload = {
-    name: 'John Doe',
     age: '20',
+    iat: Math.floor(Date.now() / 1000),
+    name: 'John Doe',
   };
   let secret = 'secret';
 
@@ -16,6 +17,7 @@ test('Compare with jsonwebtoken npm package', (t) => {
   let rust = sign(
     {
       alg: JwtAlgorithm.HS256,
+      typ: 'JWT',
     },
     JSON.stringify(payload),
     secret,
