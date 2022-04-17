@@ -1,9 +1,8 @@
-#![deny(clippy::all)]
-
 #[macro_use]
 extern crate napi_derive;
 
 pub mod sign;
+pub mod types;
 // use napi_derive::napi;
 
 // #[cfg(all(

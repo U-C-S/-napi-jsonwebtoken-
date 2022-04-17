@@ -236,6 +236,8 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { sum } = nativeBinding
+const { sign, JwtAlgorithm, sum } = nativeBinding
 
+module.exports.sign = sign
+module.exports.JwtAlgorithm = JwtAlgorithm
 module.exports.sum = sum
