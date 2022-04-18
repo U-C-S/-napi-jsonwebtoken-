@@ -16,8 +16,8 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "napi build --platform",
-    "build:release": "napi build --platform --release",
+    "build": "napi build --platform --js mappings/index.js --dts mappings/index.d.ts && cp *.node ./mappings",
+    "build:release": "napi build --platform --release --js mappings/index.js --dts mappings/index.d.ts && cp *.node ./mappings",
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "version": "napi version"

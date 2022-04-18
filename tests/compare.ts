@@ -1,6 +1,6 @@
 import test from 'ava';
 import { sign as signjwt } from 'jsonwebtoken';
-import { JwtAlgorithm, sign, verify } from '../index.js';
+import { JwtAlgorithm, sign, verify } from '../mappings/index.js';
 
 let payload = {
   age: '20',
