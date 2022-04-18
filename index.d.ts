@@ -5,11 +5,11 @@
 
 export function sign(header: JwtHeader, payload: string, secret: string): string
 export interface JwtHeader {
-  typ?: string | undefined | null
   alg: JwtAlgorithm
   cty?: string | undefined | null
   jku?: string | undefined | null
   kid?: string | undefined | null
+  typ?: string | undefined | null
   x5U?: string | undefined | null
   x5C?: Array<string> | undefined | null
   x5T?: string | undefined | null
@@ -29,4 +29,19 @@ export const enum JwtAlgorithm {
   PS512 = 10,
   EdDSA = 11
 }
+export interface VerifyOptions {
+  requiredSpecClaims?: Array<string> | undefined | null
+  leeway: number
+  validateExp: boolean
+  validateNbf: boolean
+  aud?: string | undefined | null
+  iss?: string | undefined | null
+  sub?: string | undefined | null
+  alg: JwtAlgorithm
+}
+export interface Decoded {
+  header: JwtHeader
+  claims: string
+}
+export function verify(token: string, secret: string, options: VerifyOptions): Decoded
 export function sum(a: number, b: number): number

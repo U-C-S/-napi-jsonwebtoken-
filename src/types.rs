@@ -1,7 +1,8 @@
 use jsonwebtoken::{Algorithm, Header};
 use napi::bindgen_prelude::ToNapiValue;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 #[napi(object)]
 pub struct JwtHeader {
     pub alg: JwtAlgorithm,
@@ -16,7 +17,7 @@ pub struct JwtHeader {
     pub x5t_s256: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[napi]
 pub enum JwtAlgorithm {
     HS256,
@@ -48,6 +49,20 @@ pub fn map_header(header: JwtHeader) -> Header {
     }
 }
 
+pub fn map_header2(header: Header) -> JwtHeader {
+    JwtHeader {
+        alg: map_algorithm2(header.alg),
+        cty: header.cty,
+        jku: header.jku,
+        kid: header.kid,
+        typ: header.typ,
+        x5u: header.x5u,
+        x5c: header.x5c,
+        x5t: header.x5t,
+        x5t_s256: header.x5t_s256,
+    }
+}
+
 pub fn map_algorithm(algo: JwtAlgorithm) -> Algorithm {
     match algo {
         JwtAlgorithm::HS256 => Algorithm::HS256,
@@ -62,5 +77,22 @@ pub fn map_algorithm(algo: JwtAlgorithm) -> Algorithm {
         JwtAlgorithm::PS384 => Algorithm::PS384,
         JwtAlgorithm::PS512 => Algorithm::PS512,
         JwtAlgorithm::EdDSA => Algorithm::EdDSA,
+    }
+}
+
+pub fn map_algorithm2(algo: Algorithm) -> JwtAlgorithm {
+    match algo {
+        Algorithm::HS256 => JwtAlgorithm::HS256,
+        Algorithm::HS384 => JwtAlgorithm::HS384,
+        Algorithm::HS512 => JwtAlgorithm::HS512,
+        Algorithm::ES256 => JwtAlgorithm::ES256,
+        Algorithm::ES384 => JwtAlgorithm::ES384,
+        Algorithm::RS256 => JwtAlgorithm::RS256,
+        Algorithm::RS384 => JwtAlgorithm::RS384,
+        Algorithm::RS512 => JwtAlgorithm::RS512,
+        Algorithm::PS256 => JwtAlgorithm::PS256,
+        Algorithm::PS384 => JwtAlgorithm::PS384,
+        Algorithm::PS512 => JwtAlgorithm::PS512,
+        Algorithm::EdDSA => JwtAlgorithm::EdDSA,
     }
 }
