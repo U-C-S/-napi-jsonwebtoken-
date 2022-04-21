@@ -3,19 +3,25 @@ use jsonwebtoken::{encode, EncodingKey};
 use serde_json::Value;
 
 #[napi]
-pub fn sign(header: JwtHeader, payload: String, secret: String) -> napi::Result<String> {
+pub fn sign(header: JwtHeader, payload: Value, secret: String) -> napi::Result<String> {
     let header = map_header(header);
     let key = EncodingKey::from_secret(secret.as_bytes());
 
-    let claims: Value = match serde_json::from_str(&payload) {
-        Ok(claims) => claims,
-        Err(err) => {
-            let err_out = napi::Error::new(napi::Status::Unknown, err.to_string());
-            return napi::Result::Err(err_out);
-        }
-    };
+    // let claims: Value = match serde_json::from_str(&payload) {
+    //     Ok(claims) => claims,
+    //     Err(err) => {
+    //         let err_out = napi::Error::new(napi::Status::Unknown, err.to_string());
+    //         return napi::Result::Err(err_out);
+    //     }
+    // };
+    if !(payload.is_object() || payload.is_string()) {
+        return napi::Result::Err(napi::Error::new(
+            napi::Status::InvalidArg,
+            "Payload must be an object or string".to_string(),
+        ));
+    }
 
-    match encode(&header, &claims, &key) {
+    match encode(&header, &payload, &key) {
         Ok(token) => napi::Result::Ok(token),
         Err(err) => napi::Result::Err(napi::Error::from_reason(err.to_string())),
     }
@@ -76,9 +82,10 @@ pub mod tests {
     use jsonwebtoken::{encode, EncodingKey};
     use serde::Serialize;
 
-    #[derive(Debug, Serialize)]
+    #[derive(Debug, Serialize, Clone)]
     struct Claims {
         pub age: String,
+        pub exp: usize,
         pub iat: usize,
         pub name: String,
     }
@@ -100,10 +107,11 @@ pub mod tests {
 
         let payload = Claims {
             age: "20".to_string(),
-            iat: 1650201983,
-            name: "John Doe".to_string(),
+            exp: 2000000000,
+            iat: 1650555500,
+            name: "JohnDoe".to_string(),
         };
-        let payload2 = serde_json::to_string(&payload).unwrap();
+        let payload2 = payload.serialize(serde_json::value::Serializer).unwrap();
 
         let secret_string = "baka".to_string();
         let secret_key = EncodingKey::from_secret(secret_string.as_ref());
@@ -116,6 +124,3 @@ pub mod tests {
         assert_eq!(token1, token2, "Tokens are not equal");
     }
 }
-
-// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZ2UiOiIyMCIsImlhdCI6MTY1MDIwMTk4MywibmFtZSI6IkpvaG4gRG9lIn0.mCGHGMlc2UJfXcT8NVZ60l6Q34Pw4qGfN9XS-p0T1MY
-// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZ2UiOiIyMCIsImlhdCI6MTY1MDIwMTk4MywibmFtZSI6IkpvaG4gRG9lIn0.KidzOo1Fd6Q4JgJWPjHIkQrbf-JgXUEPkCYhAH1oxdg

@@ -4,9 +4,9 @@ import { JwtAlgorithm, sign, verify } from '../mappings/index.js';
 
 let payload = {
   age: '20',
-  iat: Math.floor(Date.now() / 1000),
-  name: 'John Doe',
-  exp: 10000000000,
+  exp: 2000000000,
+  iat: 1650555500,
+  name: 'JohnDoe',
 };
 let secret = 'secret';
 
@@ -20,7 +20,7 @@ test('Compare with jsonwebtoken npm package', (t) => {
       alg: JwtAlgorithm.HS256,
       typ: 'JWT',
     },
-    JSON.stringify(payload),
+    payload,
     secret,
   );
 
@@ -30,10 +30,10 @@ test('Compare with jsonwebtoken npm package', (t) => {
 test('Sign and Verify the JWT', (t) => {
   let jwtoken = sign(
     {
-      alg: JwtAlgorithm.HS256,
       typ: 'JWT',
+      alg: JwtAlgorithm.HS256,
     },
-    JSON.stringify(payload),
+    payload,
     secret,
   );
 
