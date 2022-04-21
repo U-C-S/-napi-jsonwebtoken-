@@ -3,12 +3,22 @@ use jsonwebtoken::{encode, EncodingKey};
 use serde_json::Value;
 
 #[napi]
-pub fn sign(header: JwtHeader, payload: String, secret: String) -> String {
-    let encode_header = map_header(header);
-    let claims: Value = serde_json::from_str(&payload).unwrap();
-    let key = &EncodingKey::from_secret(secret.as_bytes());
+pub fn sign(header: JwtHeader, payload: String, secret: String) -> napi::Result<String> {
+    let header = map_header(header);
+    let key = EncodingKey::from_secret(secret.as_bytes());
 
-    encode(&encode_header, &claims, key).unwrap()
+    let claims: Value = match serde_json::from_str(&payload) {
+        Ok(claims) => claims,
+        Err(err) => {
+            let err_out = napi::Error::new(napi::Status::Unknown, err.to_string());
+            return napi::Result::Err(err_out);
+        }
+    };
+
+    match encode(&header, &claims, &key) {
+        Ok(token) => napi::Result::Ok(token),
+        Err(err) => napi::Result::Err(napi::Error::from_reason(err.to_string())),
+    }
 }
 
 // use std::collections::HashMap;
@@ -59,8 +69,6 @@ pub fn sign(header: JwtHeader, payload: String, secret: String) -> String {
 
 #[cfg(test)]
 pub mod tests {
-    use std::fs;
-
     use crate::{
         sign::sign,
         types::{map_header, JwtAlgorithm, JwtHeader},
@@ -97,18 +105,17 @@ pub mod tests {
         };
         let payload2 = serde_json::to_string(&payload).unwrap();
 
-        let secret_string = "secret".to_string();
+        let secret_string = "baka".to_string();
         let secret_key = EncodingKey::from_secret(secret_string.as_ref());
 
         let token1 = encode(&header2, &payload, &secret_key).unwrap();
-        let token2 = sign(jwtheader, payload2, secret_string);
+        let token2 = sign(jwtheader, payload2, secret_string).unwrap();
 
-        // let mut lolly = token1.clone();
-        // lolly.push_str(" ");
-        // lolly.push_str(&token2);
-        // fs::write("token1.txt", lolly).unwrap();
-        // println!("\n- {}\n- {}", token1, token2);
+        println!("\n- {}\n- {}", &token1, &token2);
 
         assert_eq!(token1, token2, "Tokens are not equal");
     }
 }
+
+// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZ2UiOiIyMCIsImlhdCI6MTY1MDIwMTk4MywibmFtZSI6IkpvaG4gRG9lIn0.mCGHGMlc2UJfXcT8NVZ60l6Q34Pw4qGfN9XS-p0T1MY
+// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhZ2UiOiIyMCIsImlhdCI6MTY1MDIwMTk4MywibmFtZSI6IkpvaG4gRG9lIn0.KidzOo1Fd6Q4JgJWPjHIkQrbf-JgXUEPkCYhAH1oxdg
