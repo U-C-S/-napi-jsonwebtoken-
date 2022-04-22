@@ -1,19 +1,12 @@
-// use std::collections::HashSet;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::types::{map_algorithm, map_header2, JwtAlgorithm, JwtHeader};
+use crate::{
+    common::throw_napi_error,
+    types::{map_algorithm, map_header2, JwtAlgorithm, JwtHeader},
+};
 
-// #[derive(Debug, Deserialize, Serialize)]
-// #[napi(object)]
-// pub struct Claims {
-//     pub exp: u32,
-//     pub nbf: u32,
-//     pub aud: String,
-//     pub iss: String,
-//     pub sub: String,
-// }
 
 // #[derive(Debug)]
 #[napi(object)]
@@ -32,24 +25,14 @@ pub struct VerifyOptions {
 #[napi(object)]
 pub struct Decoded {
     pub header: JwtHeader,
-    pub claims: String,
+    pub claims: Value,
 }
 
 #[napi]
-pub fn verify(token: String, secret: String, options: VerifyOptions) -> Decoded {
-    // let validation_opts = Validation {
-    //     required_spec_claims: HashSet::new(),
-    //     leeway: 60,
-    //     validate_exp: true,
-    //     validate_nbf: true,
-    //     aud: None,
-    //     iss: None,
-    //     sub: None,
-    //     algorithms: vec![Algorithm::HS256],
-    //     // validate_signature: false,
-    // };
+pub fn verify(token: String, secret: String, options: VerifyOptions) -> napi::Result<Decoded> {
+    let key = DecodingKey::from_secret(secret.as_ref());
 
-    let validation_opts = Validation::new(map_algorithm(options.alg));
+    let mut validation_opts = Validation::new(map_algorithm(options.alg));
     // validation_opts.aud = options.aud;
     // validation_opts.iss = options.iss;
     // validation_opts.sub = options.sub;
@@ -59,15 +42,13 @@ pub fn verify(token: String, secret: String, options: VerifyOptions) -> Decoded 
     // options.required_spec_claims
     //     && validation_opts.set_required_spec_claims(&options.required_spec_claims.unwrap());
 
-    let tokendata = decode::<Value>(
-        &token,
-        &DecodingKey::from_secret(secret.as_bytes()),
-        &validation_opts,
-    )
-    .unwrap();
+    let tokendata = match decode::<Value>(&token, &key, &validation_opts) {
+        Ok(tokendata) => tokendata,
+        Err(err) => return throw_napi_error(napi::Status::Unknown, &err.to_string()),
+    };
 
-    Decoded {
+    napi::Result::Ok(Decoded {
         header: map_header2(tokendata.header),
-        claims: serde_json::to_string(&tokendata.claims).unwrap(),
-    }
+        claims: tokendata.claims,
+    })
 }

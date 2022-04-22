@@ -41,7 +41,7 @@ export interface VerifyOptions {
 }
 export interface Decoded {
   header: JwtHeader
-  claims: string
+  claims: any
 }
 export function verify(token: string, secret: string, options: VerifyOptions): Decoded
 export function sum(a: number, b: number): number

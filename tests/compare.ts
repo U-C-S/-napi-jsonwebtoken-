@@ -43,7 +43,7 @@ test('Sign and Verify the JWT', (t) => {
     validateExp: false,
     validateNbf: false,
   });
-  let x = JSON.parse(decodedInfo.claims).name;
+  let x = decodedInfo.claims.name;
 
   t.is(payload.name, x);
 });
