@@ -1,29 +1,25 @@
-use crate::types::{map_header, JwtHeader};
+use crate::{
+    common::throw_napi_error,
+    types::{map_header, JwtHeader},
+};
 use jsonwebtoken::{encode, EncodingKey};
 use serde_json::Value;
 
 #[napi]
 pub fn sign(header: JwtHeader, payload: Value, secret: String) -> napi::Result<String> {
     let header = map_header(header);
-    let key = EncodingKey::from_secret(secret.as_bytes());
+    let key = EncodingKey::from_secret(secret.as_ref());
 
-    // let claims: Value = match serde_json::from_str(&payload) {
-    //     Ok(claims) => claims,
-    //     Err(err) => {
-    //         let err_out = napi::Error::new(napi::Status::Unknown, err.to_string());
-    //         return napi::Result::Err(err_out);
-    //     }
-    // };
     if !(payload.is_object() || payload.is_string()) {
-        return napi::Result::Err(napi::Error::new(
+        return throw_napi_error(
             napi::Status::InvalidArg,
-            "Payload must be an object or string".to_string(),
-        ));
+            "Payload must be an object or string",
+        );
     }
 
     match encode(&header, &payload, &key) {
         Ok(token) => napi::Result::Ok(token),
-        Err(err) => napi::Result::Err(napi::Error::from_reason(err.to_string())),
+        Err(err) => throw_napi_error(napi::Status::Unknown, &err.to_string()),
     }
 }
 

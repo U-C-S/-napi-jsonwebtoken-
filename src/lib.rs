@@ -5,6 +5,7 @@ extern crate napi_derive;
 mod sign;
 pub mod types;
 mod verify;
+mod common;
 // use napi_derive::napi;
 
 // #[cfg(all(
